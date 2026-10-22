@@ -1,1 +1,321 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#e85d04">
+  <title>SidiFood | طلب المأكولات</title>
+  <style>
+    :root {
+      --orange: #e85d04;
+      --dark: #242424;
+      --light: #fff8f1;
+      --green: #248a49;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: var(--dark);
+    }
+    header {
+      background: var(--orange);
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px; font-size: 32px; }
+    header p { margin: 0; }
+    .container { max-width: 850px; margin: auto; padding: 16px; }
+    .notice {
+      background: #fff0dc;
+      border-right: 4px solid var(--orange);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    input, select, textarea, button {
+      font: inherit;
+    }
+    #search {
+      width: 100%;
+      padding: 14px;
+      margin: 16px 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: white;
+    }
+    h2 { font-size: 22px; }
+    .foods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 12px;
+    }
+    .food {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+    .emoji { font-size: 43px; text-align: center; }
+    .food h3 { margin: 8px 0; font-size: 17px; }
+    .price { color: var(--orange); font-weight: bold; margin: 8px 0; }
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 11px;
+    }
+    .add {
+      width: 100%;
+      background: var(--orange);
+      color: white;
+    }
+    .cart {
+      margin-top: 24px;
+      padding: 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .qty { display: flex; align-items: center; gap: 8px; }
+    .qty button { background: #eee; min-width: 32px; }
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+    }
+    .grand-total { font-size: 20px; font-weight: bold; }
+    .order-form { display: grid; gap: 10px; margin-top: 16px; }
+    .order-form input, .order-form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .order-btn { background: var(--green); color: white; width: 100%; }
+    .clear-btn { background: #eee; width: 100%; margin-top: 8px; }
+    footer { text-align: center; padding: 25px 12px; color: #666; font-size: 13px; }
+    .empty { color: #777; text-align: center; padding: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍔 SidiFood</h1>
+    <p>مأكولات سيدي بلعباس تصلك إلى باب بيتك</p>
+  </header>
+
+  <main class="container">
+    <div class="notice">
+      👋 مرحبًا بك في SidiFood! اختر مأكولاتك وأضفها إلى السلة.
+      <br>
+      ⚠️ هذه نسخة تجريبية. أسماء المطاعم والأسعار أمثلة وليست عروضًا مؤكدة.
+    </div>
+
+    <input id="search" type="search" placeholder="🔎 ابحث عن مأكولتك..." aria-label="البحث عن مأكولات">
+
+    <h2>🍽️ قائمة المأكولات</h2>
+    <div class="foods" id="foods"></div>
+
+    <section class="cart" id="cart">
+      <h2>🛒 سلة الطلبات</h2>
+      <div id="cart-items"><p class="empty">السلة فارغة حاليًا.</p></div>
+
+      <div class="total-line">
+        <span>مجموع المأكولات</span>
+        <strong id="subtotal">0 دج</strong>
+      </div>
+      <div class="total-line">
+        <span>رسوم المنصة التجريبية</span>
+        <strong>20 دج</strong>
+      </div>
+      <div class="total-line grand-total">
+        <span>المجموع</span>
+        <strong id="total">0 دج</strong>
+      </div>
+
+      <h2>📋 معلومات الطلب</h2>
+      <form class="order-form" id="order-form">
+        <input id="customer" placeholder="الاسم الكامل" required>
+        <input id="phone" type="tel" placeholder="رقم الهاتف" required>
+        <input id="address" placeholder="عنوان التوصيل في سيدي بلعباس" required>
+        <textarea id="notes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+        <button class="order-btn" type="submit">تأكيد تجريبي للطلب</button>
+      </form>
+
+      <button class="clear-btn" id="clear">إفراغ السلة</button>
+      <p class="notice">
+        لا يتم إرسال الطلب إلى مطعم حقيقي في هذه النسخة.
+        لا توجد مدفوعات إلكترونية، ورسوم 20 دج مجرد مثال قابل للتعديل.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 SidiFood — مشروع محلي لدعم مطاعم سيدي بلعباس
+  </footer>
+
+  <script>
+    const products = [
+      { id: 1, name: "بيتزا", emoji: "🍕", price: 500 },
+      { id: 2, name: "برغر", emoji: "🍔", price: 450 },
+      { id: 3, name: "شاورما", emoji: "🌯", price: 350 },
+      { id: 4, name: "تاكوس", emoji: "🌮", price: 400 },
+      { id: 5, name: "دجاج مشوي", emoji: "🍗", price: 700 },
+      { id: 6, name: "بطاطا مقلية", emoji: "🍟", price: 150 },
+      { id: 7, name: "ساندويتش", emoji: "🥪", price: 250 },
+      { id: 8, name: "مشروب", emoji: "🥤", price: 100 }
+    ];
+
+    const cart = {};
+    const foodsEl = document.getElementById("foods");
+    const cartEl = document.getElementById("cart-items");
+    const searchEl = document.getElementById("search");
+
+    function renderProducts(filter = "") {
+      foodsEl.innerHTML = "";
+      const filtered = products.filter(p =>
+        p.name.toLowerCase().includes(filter.trim().toLowerCase())
+      );
+
+      if (!filtered.length) {
+        foodsEl.innerHTML = '<p class="empty">لم نجد هذه المأكولات.</p>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement("article");
+        card.className = "food";
+
+        const emoji = document.createElement("div");
+        emoji.className = "emoji";
+        emoji.textContent = p.emoji;
+
+        const name = document.createElement("h3");
+        name.textContent = p.name;
+
+        const price = document.createElement("p");
+        price.className = "price";
+        price.textContent = p.price + " دج";
+
+        const add = document.createElement("button");
+        add.className = "add";
+        add.textContent = "＋ أضف إلى السلة";
+        add.addEventListener("click", () => {
+          cart[p.id] = (cart[p.id] || 0) + 1;
+          renderCart();
+        });
+
+        card.append(emoji, name, price, add);
+        foodsEl.appendChild(card);
+      });
+    }
+
+    function renderCart() {
+      cartEl.innerHTML = "";
+      const entries = products.filter(p => cart[p.id] > 0);
+
+      if (!entries.length) {
+        cartEl.innerHTML = '<p class="empty">السلة فارغة حاليًا.</p>';
+      }
+
+      let subtotal = 0;
+
+      entries.forEach(p => {
+        const qty = cart[p.id];
+        subtotal += p.price * qty;
+
+        const row = document.createElement("div");
+        row.className = "cart-item";
+
+        const label = document.createElement("span");
+        label.textContent = `${p.emoji} ${p.name} — ${p.price * qty} دج`;
+
+        const controls = document.createElement("div");
+        controls.className = "qty";
+
+        const minus = document.createElement("button");
+        minus.type = "button";
+        minus.textContent = "−";
+        minus.setAttribute("aria-label", "تقليل الكمية");
+        minus.addEventListener("click", () => {
+          cart[p.id]--;
+          if (cart[p.id] <= 0) delete cart[p.id];
+          renderCart();
+        });
+
+        const count = document.createElement("span");
+        count.textContent = qty;
+
+        const plus = document.createElement("button");
+        plus.type = "button";
+        plus.textContent = "+";
+        plus.setAttribute("aria-label", "زيادة الكمية");
+        plus.addEventListener("click", () => {
+          cart[p.id]++;
+          renderCart();
+        });
+
+        controls.append(minus, count, plus);
+        row.append(label, controls);
+        cartEl.appendChild(row);
+      });
+
+      document.getElementById("subtotal").textContent = subtotal + " دج";
+      document.getElementById("total").textContent =
+        (subtotal + (subtotal > 0 ? 20 : 0)) + " دج";
+    }
+
+    searchEl.addEventListener("input", () => renderProducts(searchEl.value));
+
+    document.getElementById("clear").addEventListener("click", () => {
+      Object.keys(cart).forEach(id => delete cart[id]);
+      renderCart();
+    });
+
+    document.getElementById("order-form").addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (!Object.keys(cart).length) {
+        alert("أضف مأكولات إلى السلة أولًا.");
+        return;
+      }
+
+      const lines = products
+        .filter(p => cart[p.id] > 0)
+        .map(p => `${p.name} × ${cart[p.id]}`)
+        .join("\n");
+
+      const subtotal = products.reduce(
+        (sum, p) => sum + p.price * (cart[p.id] || 0), 0
+      );
+
+      alert(
+        "تم إنشاء ملخص تجريبي فقط، ولم يُرسل الطلب إلى المطعم.\n\n" +
+        "الاسم: " + document.getElementById("customer").value + "\n" +
+        "الهاتف: " + document.getElementById("phone").value + "\n" +
+        "العنوان: " + document.getElementById("address").value + "\n\n" +
+        "الطلب:\n" + lines + "\n\n" +
+        "مجموع المأكولات: " + subtotal + " دج\n" +
+        "رسوم المنصة التجريبية: " + (subtotal > 0 ? 20 : 0) + " دج\n" +
+        "المجموع: " + (subtotal + (subtotal > 0 ? 20 : 0)) + " دج"
+      );
+    });
+
+    renderProducts();
+    renderCart();
+  </script>
+</body>
+</html>
+
